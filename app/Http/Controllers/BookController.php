@@ -12,7 +12,7 @@ class BookController extends Controller
     // To get aggregate books 
     public function getAllBooks() 
     {
-        $books = Book::orderBy('id', 'desc')->get();
+        $books = Book::orderBy('title')->paginate(10);
 
         if (!is_null($books)) {
             $data = [
@@ -24,7 +24,7 @@ class BookController extends Controller
             $data = [
                 'message'=>'No record found',
             ];
-            return response($data, 201);
+            return response()->json($data, 201);
         }
     }
 
@@ -43,7 +43,7 @@ class BookController extends Controller
             $data = [
                 'message'=>'No Book found',
             ];
-            return response($data, 200);
+            return response()->json($data, 200);
         }
     }
 
@@ -65,9 +65,28 @@ class BookController extends Controller
             $data = [
                 'message'=>'Failed to save!!!',
             ];
-            return response($data, 200);
+            return response()->json($data, 200);
         }
 
+    }
+
+    //get an author
+    public function get_author($id)
+    {
+        $author = Author::find($id)->get();
+
+        if (!is_null($author)) {
+            $data = [
+                'data'=>$author,
+                'message'=>'success',
+            ];
+            return response($data, 200);
+        }else {
+            $data = [
+                'message'=>'No Author found',
+            ];
+            return response()->json($data, 200);
+        }
     }
 
     // To create book 
@@ -90,11 +109,38 @@ class BookController extends Controller
             $data = [
                 'message'=>'Error!!!',
             ];
-            return response($data, 200);
+            return response()->json($data, 200);
         }
 
         
     }
 
-    // public function 
+    // search query
+    public function search_book_title(Request $request, $title)
+    {
+        $search_title = $title;
+        $query = Book::where('title', 'LIKE', "%$search_title%")->get();
+
+        return response()->json($query, 200);
+    }
+
+    // search query for author
+    public function search_author(Request $request, $author)
+    {
+        $search_author = $author;
+        $query = Author::where('id', 'LIKE', "%$search_author%")->paginate(10);
+
+        if (!is_null($query)) {
+            $data = [
+                'data'=>$query,
+                'message'=>'success',
+            ];
+            return response()->json($data, 200);
+        }else {
+            $data = [
+                'message'=>'No Author found',
+            ];
+            return response()->json($data, 404);
+        }
+    }
 }
